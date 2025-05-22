@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'petstoreapp',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
