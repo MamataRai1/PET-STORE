@@ -1,0 +1,59 @@
+# === Python / Django ===
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+*.pot
+*.pyc
+db.sqlite3
+*.mo
+*.env
+.env.*
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+local_settings.py
+settings_local.py
+
+# Django specific:
+staticfiles/
+media/
+*.pid
+
+# === Node / React (Vite) ===
+node_modules/
+dist/
+build/
+.vite/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === OS / Editor Files ===
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# === Test & Coverage ===
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+.cache/
+.pytest_cache/
+nosetests.xml
+test_*.log
+junit-*.xml
+
+# === Misc ===
+*.bak
+*.tmp
+*.old
+*.orig
