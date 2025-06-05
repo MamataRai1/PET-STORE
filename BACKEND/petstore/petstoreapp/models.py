@@ -1,31 +1,29 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser, Group, Permission
 
+
+# ---------- Custom User ---------- #
 class User(AbstractUser):
     is_customer = models.BooleanField(default=False)
     is_seller = models.BooleanField(default=False)
     phone = models.CharField(max_length=10, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
 
-    # Fix for reverse accessor clashes
+    # Avoiding reverse accessor clashes
     groups = models.ManyToManyField(
         Group,
-        related_name="custom_user_groups",  # You can rename this if you'd like
+        related_name="custom_user_groups",
         blank=True,
-        help_text=(
-            "The groups this user belongs to. A user will get all permissions "
-            "granted to each of their groups."
-        ),
+        help_text=_("The groups this user belongs to."),
         related_query_name="user",
     )
     user_permissions = models.ManyToManyField(
         Permission,
-        related_name="custom_user_permissions",  # Rename if desired
+        related_name="custom_user_permissions",
         blank=True,
-        help_text="Specific permissions for this user.",
+        help_text=_("Specific permissions for this user."),
         related_query_name="user",
     )
 
@@ -34,7 +32,7 @@ class User(AbstractUser):
 
 
 class PhoneNumber(models.Model):
-    """4NF: a user can list many phone numbers, and a phone number can belong to many users (family account)"""
+    """A phone number can be used by many users (e.g., family)."""
     number = models.CharField(max_length=25, unique=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="phone_numbers")
 
@@ -47,12 +45,8 @@ class Address(models.Model):
         SHIPPING = "SHP", _("Shipping")
         BILLING = "BIL", _("Billing")
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="addresses"
-    )
-    type = models.CharField(
-        max_length=5, choices=AddressType.choices, default=AddressType.SHIPPING
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="addresses")
+    type = models.CharField(max_length=5, choices=AddressType.choices, default=AddressType.SHIPPING)
     line1 = models.CharField(max_length=150)
     line2 = models.CharField(max_length=150, blank=True)
     city = models.CharField(max_length=50)
@@ -80,7 +74,7 @@ class Category(models.Model):
     def __str__(self):
         full_path = [self.name]
         k = self.parent
-        while k is not None:
+        while k:
             full_path.append(k.name)
             k = k.parent
         return " -> ".join(full_path[::-1])
@@ -96,26 +90,11 @@ class Brand(models.Model):
     def __str__(self):
         return self.name
 
-from django.db import models
-
-class Brand(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
-
-class Category(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
 
 class Product(models.Model):
     sku = models.CharField(max_length=40, unique=True)
     name = models.CharField(max_length=120)
-    main_image = models.ImageField(upload_to="mainProductImages", null=True, blank=True)  # ✅ Main image field
+    main_image = models.ImageField(upload_to="mainProductImages", null=True, blank=True)
     description = models.TextField()
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, related_name="products")
     categories = models.ManyToManyField(Category, through="ProductCategory")
@@ -143,7 +122,7 @@ class ProductCategory(models.Model):
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
-    image_url = models.ImageField(upload_to="productImages")  # ✅ Multiple images per product
+    image_url = models.ImageField(upload_to="productImages")
     alt_text = models.CharField(max_length=140, blank=True)
     sort_order = models.PositiveSmallIntegerField(default=0)
 
@@ -156,7 +135,6 @@ class ProductImage(models.Model):
 
 
 class ProductAttribute(models.Model):
-    """EAV pattern but each fact atomic -> 4NF"""
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="attributes")
     name = models.CharField(max_length=40)   # e.g., "Color"
     value = models.CharField(max_length=120) # e.g., "Red"
@@ -164,9 +142,11 @@ class ProductAttribute(models.Model):
     class Meta:
         unique_together = ("product", "name", "value")
 
+    def __str__(self):
+        return f"{self.name}: {self.value}"
+
 
 class Variant(models.Model):
-    """Each variant is its own product-id + distinguishing option(s)"""
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="variants")
     label = models.CharField(max_length=80)  # e.g., "2kg pack"
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -198,6 +178,9 @@ class CartItem(models.Model):
 
     class Meta:
         unique_together = ("cart", "variant")
+
+    def __str__(self):
+        return f"{self.variant} x {self.quantity}"
 
 
 class Order(models.Model):
@@ -239,6 +222,9 @@ class Payment(models.Model):
     transaction_id = models.CharField(max_length=120, blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return f"Payment for Order {self.order.id}"
+
 
 # ---------- Reviews ---------- #
 class Review(models.Model):
@@ -250,4 +236,7 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("product", "user")  # one review per user per product
+        unique_together = ("product", "user")
+
+    def __str__(self):
+        return f"{self.user} review on {self.product}"

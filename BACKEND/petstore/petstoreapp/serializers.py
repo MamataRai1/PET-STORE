@@ -2,13 +2,13 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import (
     PhoneNumber, Address, Category, Brand, Product, ProductCategory,
-    ProductImage, ProductAttribute, Variant, Cart, CartItem, Order,
-    OrderItem, Payment, Review
+    ProductImage, ProductAttribute, Variant, Cart, CartItem,
+    Order, OrderItem, Payment, Review
 )
 
 User = get_user_model()
 
-# ---------- User & Related ---------- #
+# ---------- USER SERIALIZERS ---------- #
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -27,7 +27,7 @@ class AddressSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# ---------- Product Info ---------- #
+# ---------- PRODUCT INFO SERIALIZERS ---------- #
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -37,7 +37,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name']  # Removed 'description' since it’s not in the model
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):
@@ -69,21 +69,17 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     attributes = ProductAttributeSerializer(many=True, read_only=True)
     variants = VariantSerializer(many=True, read_only=True)
-    reviews = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = [
             'id', 'sku', 'name', 'main_image', 'description',
-            'brand', 'categories', 'created_at', 'updated_at',
-            'is_active', 'images', 'attributes', 'variants', 'reviews'
+            'brand', 'categories', 'created_at', 'updated_at', 'is_active',
+            'images', 'attributes', 'variants'
         ]
 
-    def get_reviews(self, obj):
-        return ReviewSerializer(obj.reviews.all(), many=True).data
 
-
-# ---------- Cart & Orders ---------- #
+# ---------- CART & ORDER SERIALIZERS ---------- #
 class CartItemSerializer(serializers.ModelSerializer):
     variant = VariantSerializer(read_only=True)
 
@@ -109,24 +105,31 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True)
+    user = UserSerializer(read_only=True)
     shipping_addr = AddressSerializer(read_only=True)
+    items = OrderItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = Order
         fields = ['id', 'user', 'status', 'placed_at', 'shipping_addr', 'total_amount', 'items']
 
 
+# ---------- PAYMENT SERIALIZER ---------- #
 class PaymentSerializer(serializers.ModelSerializer):
+    method_display = serializers.CharField(source='get_method_display', read_only=True)
+
     class Meta:
         model = Payment
-        fields = ['id', 'order', 'method', 'status', 'transaction_id', 'paid_at']
+        fields = ['id', 'order', 'method', 'method_display', 'status', 'transaction_id', 'paid_at']
+        read_only_fields = ['paid_at', 'method_display']
 
 
-# ---------- Reviews ---------- #
+# ---------- REVIEW SERIALIZER ---------- #
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
 
     class Meta:
         model = Review
         fields = ['id', 'product', 'user', 'rating', 'title', 'comment', 'created_at']
+        read_only_fields = ['created_at', 'user', 'product']
