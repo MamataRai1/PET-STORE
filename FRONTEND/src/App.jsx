@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from "axios";
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import LandingPage from './components/LandingPage';
 
 function App() {
   const [routers, setRouters] = useState([]);
@@ -18,6 +20,8 @@ function App() {
   return (
     <>
       <Navbar />
+      <LandingPage/>
+     
       <div className="p-4">
         <h1 className="text-xl font-bold">Available API Routes:</h1>
         <ul className="list-disc pl-5">
@@ -26,6 +30,7 @@ function App() {
           ))}
         </ul>
       </div>
+      <Footer />
     </>
   );
 }
