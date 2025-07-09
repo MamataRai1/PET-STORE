@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { PawPrint, ShoppingBag } from "lucide-react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // <-- Add this line
+import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
   const [bannerImage, setBannerImage] = useState("");
-  const navigate = useNavigate(); // <-- Initialize navigate
+  const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -17,6 +18,18 @@ export default function LandingPage() {
       }
     };
     fetchImage();
+  }, []);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/api/products/new");
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      }
+    };
+    fetchProducts();
   }, []);
 
   const petItems = [
@@ -76,17 +89,13 @@ export default function LandingPage() {
         </div>
       </main>
 
-      <section className="mt-16">
+      <section className="mt-20">
         <h3 className="text-2xl font-bold mb-6 text-center text-gray-800">
-          Why Pet Lovers Choose Us 🐾
+          Choose by Pet Type 🐾
         </h3>
         <div className="flex flex-col md:flex-row justify-center gap-8">
           {petItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex flex-col items-center gap-4 cursor-pointer"
-              onClick={() => navigate(item.link)}
-            >
+            <div key={item.id} className="flex flex-col items-center gap-4 cursor-pointer" onClick={() => navigate(item.link)}>
               <img
                 src={item.image}
                 alt={item.label}
@@ -96,7 +105,45 @@ export default function LandingPage() {
                 {item.label}
               </button>
             </div>
-          ))} {/* ✅ Properly closed */}
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-20">
+        <p className="text-green-700 text-center font-medium">Special Product</p>
+        <h3 className="text-3xl font-bold mb-8 text-center text-gray-800">New Arrivals Product</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.length > 0 ? (
+            products.slice(0, 5).map((product) => (
+              <div
+                key={product.id}
+                onClick={() => navigate(`/product/${product.id}`)}
+                className="bg-white p-4 rounded-2xl shadow hover:shadow-lg transition cursor-pointer relative"
+              >
+                {product.discount && (
+                  <div className="absolute top-2 left-2 bg-yellow-300 text-yellow-900 text-xs font-bold px-2 py-1 rounded">
+                    -{product.discount}%
+                  </div>
+                )}
+                <div className="w-full h-48 bg-gray-100 rounded-xl mb-4 flex items-center justify-center text-gray-400 text-sm">
+                  No image
+                </div>
+                <h4 className="font-bold text-lg text-gray-800 text-center">{product.name}</h4>
+                <div className="text-center">
+                  {product.discount ? (
+                    <>
+                      <p className="text-orange-600 font-bold">${product.price}</p>
+                      <p className="line-through text-gray-400 text-sm">${product.original_price}</p>
+                    </>
+                  ) : (
+                    <p className="mt-2 font-semibold text-orange-600">${product.price}</p>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-600 col-span-full">No products found.</p>
+          )}
         </div>
       </section>
 
