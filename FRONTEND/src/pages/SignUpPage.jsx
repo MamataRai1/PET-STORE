@@ -1,12 +1,42 @@
-
-
 import React, { useState } from "react";
-import { User, Lock, Mail } from "lucide-react";
+import axios from "axios";
+import { User, Lock, Mail, Phone, MapPin } from "lucide-react";
 
 const SignUpPage = () => {
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    phone: "",
+    address: "",
+  });
   const [role, setRole] = useState("customer");
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleRoleChange = (r) => setRole(r);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const dataToSend = {
+      ...formData,
+      is_customer: role === "customer",
+      is_seller: role === "seller",
+    };
+
+    try {
+      const res = await axios.post("http://127.0.0.1:8000/api/users/", dataToSend);
+      alert("User registered successfully!");
+      console.log(res.data);
+    } catch (err) {
+      console.error(err);
+      alert("Registration failed. Check the console.");
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 to-yellow-100 px-4">
@@ -16,9 +46,9 @@ const SignUpPage = () => {
         </h1>
         <p className="text-center text-gray-500 mb-6">Create an account 🐾</p>
 
-        {/* Role Toggle */}
         <div className="flex justify-center gap-4 mb-6">
           <button
+            type="button"
             onClick={() => handleRoleChange("customer")}
             className={`px-4 py-2 rounded-full font-semibold text-sm ${
               role === "customer"
@@ -29,24 +59,28 @@ const SignUpPage = () => {
             Customer
           </button>
           <button
-            onClick={() => handleRoleChange("admin")}
+            type="button"
+            onClick={() => handleRoleChange("seller")}
             className={`px-4 py-2 rounded-full font-semibold text-sm ${
-              role === "admin"
+              role === "seller"
                 ? "bg-orange-500 text-white"
                 : "bg-gray-200 text-gray-600"
             }`}
           >
-            Admin
+            Seller
           </button>
         </div>
 
-        {/* Signup Form */}
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="relative">
             <input
               type="text"
-              placeholder="Full Name"
+              name="username"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
+              required
             />
             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           </div>
@@ -54,8 +88,12 @@ const SignUpPage = () => {
           <div className="relative">
             <input
               type="email"
+              name="email"
               placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
+              required
             />
             <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
           </div>
@@ -63,10 +101,39 @@ const SignUpPage = () => {
           <div className="relative">
             <input
               type="password"
+              name="password"
               placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
+              required
             />
             <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          </div>
+
+          <div className="relative">
+            <input
+              type="text"
+              name="phone"
+              placeholder="Phone (Optional)"
+              value={formData.phone}
+              onChange={handleChange}
+              maxLength={10}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
+            />
+            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          </div>
+
+          <div className="relative">
+            <textarea
+              name="address"
+              placeholder="Address (Optional)"
+              value={formData.address}
+              onChange={handleChange}
+              rows="2"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none resize-none"
+            />
+            <MapPin className="absolute left-3 top-3 text-gray-400" size={18} />
           </div>
 
           <button

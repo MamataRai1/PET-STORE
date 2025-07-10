@@ -9,10 +9,41 @@ from .models import (
 User = get_user_model()
 
 # ---------- USER SERIALIZERS ---------- #
+# class UserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['id', 'username', 'email', 'password', 'is_customer', 'is_seller', 'phone', 'address']
+#         extra_kwargs = {
+#             'password': {'write_only': True}
+#         }
+
+#     def create(self, validated_data):
+#         user = User(
+#             username=validated_data['username'],
+#             email=validated_data.get('email'),
+#             phone=validated_data.get('phone'),
+#             address=validated_data.get('address'),
+#             is_customer=validated_data.get('is_customer', False),
+#             is_seller=validated_data.get('is_seller', False),
+#         )
+#         user.set_password(validated_data['password'])
+#         user.save()
+#         return user
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'is_customer', 'is_seller', 'phone', 'address']
+        fields = ['id', 'username', 'email', 'password', 'is_customer', 'is_seller', 'phone', 'address']
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)  # <- hashes the password correctly
+        user.save()
+        return user
+
+
 
 
 class PhoneNumberSerializer(serializers.ModelSerializer):

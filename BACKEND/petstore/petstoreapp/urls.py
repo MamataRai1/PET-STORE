@@ -14,11 +14,13 @@ from .views import (
     OrderViewSet,
     OrderItemViewSet,
     PaymentViewSet,
-    ReviewViewSet
+    ReviewViewSet,
+    UserViewSet
 )
 from rest_framework.routers import DefaultRouter
 
 router=DefaultRouter()
+router.register(r'users', UserViewSet, basename='user'),
 router.register(r'phonenum', PhoneNumberViewSet, basename='phone-number'),
 router.register(r'address', AddressViewSet, basename='address'),
 router.register(r'category', CategoryViewSet, basename='category'), 

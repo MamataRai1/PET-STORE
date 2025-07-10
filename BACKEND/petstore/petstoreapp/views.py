@@ -10,12 +10,16 @@ from .serializers import (
     BrandSerializer, ProductCategorySerializer, ProductImageSerializer,
     ProductAttributeSerializer, VariantSerializer, CartSerializer,
     CartItemSerializer, OrderSerializer, OrderItemSerializer,
-    PaymentSerializer, ReviewSerializer 
+    PaymentSerializer, ReviewSerializer ,UserSerializer
 )    
-
-
+from django.contrib.auth import get_user_model
 from rest_framework import viewsets
+User = get_user_model()
 
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 # Create your views here.
 def index(request):
     return HttpResponse("Welcome to the Pet Store API. Please use the endpoints provided in the documentation to interact with the API.")

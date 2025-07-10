@@ -1,9 +1,9 @@
 import React from 'react'
 
-export default function ProductCard() {
+export default function ShopPAge() {
   return (
     <div>
-      <h1>hello</h1>
+      <h1>this is shop</h1>
     </div>
   )
 }
