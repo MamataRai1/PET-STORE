@@ -8,27 +8,7 @@ from .models import (
 
 User = get_user_model()
 
-# ---------- USER SERIALIZERS ---------- #
-# class UserSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ['id', 'username', 'email', 'password', 'is_customer', 'is_seller', 'phone', 'address']
-#         extra_kwargs = {
-#             'password': {'write_only': True}
-#         }
-
-#     def create(self, validated_data):
-#         user = User(
-#             username=validated_data['username'],
-#             email=validated_data.get('email'),
-#             phone=validated_data.get('phone'),
-#             address=validated_data.get('address'),
-#             is_customer=validated_data.get('is_customer', False),
-#             is_seller=validated_data.get('is_seller', False),
-#         )
-#         user.set_password(validated_data['password'])
-#         user.save()
-#         return user
+# ---------- USER SERIALIZER ---------- #
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
@@ -39,13 +19,12 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = User(**validated_data)
-        user.set_password(password)  # <- hashes the password correctly
+        user.set_password(password)
         user.save()
         return user
 
 
-
-
+# ---------- PHONE & ADDRESS ---------- #
 class PhoneNumberSerializer(serializers.ModelSerializer):
     class Meta:
         model = PhoneNumber
@@ -58,7 +37,7 @@ class AddressSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# ---------- PRODUCT INFO SERIALIZERS ---------- #
+# ---------- CATEGORY & BRAND ---------- #
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -68,9 +47,10 @@ class CategorySerializer(serializers.ModelSerializer):
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'name']  # Removed 'description' since it’s not in the model
+        fields = ['id', 'name']
 
 
+# ---------- PRODUCT RELATED ---------- #
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
@@ -78,9 +58,17 @@ class ProductCategorySerializer(serializers.ModelSerializer):
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductImage
         fields = ['id', 'product', 'image_url', 'alt_text', 'sort_order']
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image_url and hasattr(obj.image_url, 'url'):
+            return request.build_absolute_uri(obj.image_url.url)
+        return None
 
 
 class ProductAttributeSerializer(serializers.ModelSerializer):
@@ -100,17 +88,28 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     attributes = ProductAttributeSerializer(many=True, read_only=True)
     variants = VariantSerializer(many=True, read_only=True)
+    main_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = [
-            'id', 'sku', 'name', 'main_image', 'description',
-            'brand', 'categories', 'created_at', 'updated_at', 'is_active',
+            'id', 'sku', 'name', 'main_image', 'main_image_url', 'description',
+            'brand', 'categories', 'price', 'created_at', 'updated_at', 'is_active',
             'images', 'attributes', 'variants'
         ]
 
+    def get_main_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.main_image and hasattr(obj.main_image, 'url'):
+            return request.build_absolute_uri(obj.main_image.url)
+        elif obj.images.exists():
+            first_image = obj.images.first()
+            if first_image.image_url and hasattr(first_image.image_url, 'url'):
+                return request.build_absolute_uri(first_image.image_url.url)
+        return None
 
-# ---------- CART & ORDER SERIALIZERS ---------- #
+
+# ---------- CART & ORDER ---------- #
 class CartItemSerializer(serializers.ModelSerializer):
     variant = VariantSerializer(read_only=True)
 
@@ -145,7 +144,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'status', 'placed_at', 'shipping_addr', 'total_amount', 'items']
 
 
-# ---------- PAYMENT SERIALIZER ---------- #
+# ---------- PAYMENT ---------- #
 class PaymentSerializer(serializers.ModelSerializer):
     method_display = serializers.CharField(source='get_method_display', read_only=True)
 
@@ -155,7 +154,7 @@ class PaymentSerializer(serializers.ModelSerializer):
         read_only_fields = ['paid_at', 'method_display']
 
 
-# ---------- REVIEW SERIALIZER ---------- #
+# ---------- REVIEW ---------- #
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     product = ProductSerializer(read_only=True)
@@ -165,6 +164,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'product', 'user', 'rating', 'title', 'comment', 'created_at']
         read_only_fields = ['created_at', 'user', 'product']
 
+
+# ---------- BANNER IMAGE ---------- #
 class BannerImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
 

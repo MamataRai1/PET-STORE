@@ -10,22 +10,29 @@ from .serializers import (
     BrandSerializer, ProductCategorySerializer, ProductImageSerializer,
     ProductAttributeSerializer, VariantSerializer, CartSerializer,
     CartItemSerializer, OrderSerializer, OrderItemSerializer,
-    PaymentSerializer, ReviewSerializer ,UserSerializer, BannerImageSerializer,ProductSerializer
+    PaymentSerializer, ReviewSerializer, UserSerializer,
+    BannerImageSerializer, ProductSerializer
 )    
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
 User = get_user_model()
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-# Create your views here.
+# ---------- Basic Welcome View ---------- #
 def index(request):
     return HttpResponse("Welcome to the Pet Store API. Please use the endpoints provided in the documentation to interact with the API.")
 
+
+# ---------- USER ---------- #
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+# ---------- PHONE & ADDRESS ---------- #
 class PhoneNumberViewSet(viewsets.ModelViewSet):
     queryset = PhoneNumber.objects.all()
     serializer_class = PhoneNumberSerializer
@@ -34,6 +41,8 @@ class AddressViewSet(viewsets.ModelViewSet):
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
 
+
+# ---------- PRODUCT STRUCTURE ---------- #
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -41,10 +50,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
-
-class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
 
 class ProductCategoryViewSet(viewsets.ModelViewSet):
     queryset = ProductCategory.objects.all()
@@ -62,6 +67,17 @@ class VariantViewSet(viewsets.ModelViewSet):
     queryset = Variant.objects.all()
     serializer_class = VariantSerializer
 
+
+# ✅ UPDATED: PRODUCT VIEWSET with context
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+
+
+# ---------- CART & ORDER ---------- #
 class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
@@ -79,6 +95,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     serializer_class = OrderItemSerializer
 
 
+# ---------- PAYMENT & REVIEW ---------- #
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
@@ -88,6 +105,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 
 
+# ✅ UPDATED: BANNER IMAGE with request context
 class BannerImageView(APIView):
     def get(self, request):
         banner = BannerImage.objects.first()

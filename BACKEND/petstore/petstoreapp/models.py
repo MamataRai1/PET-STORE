@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser, Group, Permission
+from decimal import Decimal
 
 
 # ---------- Custom User ---------- #
@@ -96,8 +97,9 @@ class Product(models.Model):
     name = models.CharField(max_length=120)
     main_image = models.ImageField(upload_to="mainProductImages", null=True, blank=True)
     description = models.TextField()
-    brand = models.ForeignKey(Brand, on_delete=models.PROTECT, related_name="products")
-    categories = models.ManyToManyField(Category, through="ProductCategory")
+    brand = models.ForeignKey('Brand', on_delete=models.PROTECT, related_name="products")
+    categories = models.ManyToManyField('Category', through="ProductCategory")
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # New price field
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -107,7 +109,6 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class ProductCategory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
