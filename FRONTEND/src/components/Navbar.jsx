@@ -15,10 +15,11 @@ const Navbar = () => {
 
         {/* Desktop Nav Links */}
         <ul className="hidden md:flex gap-8 font-medium text-md">
-          <li><a href="/" className="hover:text-orange-500 transition">Home</a></li>
-          <li><a href="/shop" className="hover:text-orange-500 transition">Product</a></li>
-          <li><a href="/featured" className="hover:text-orange-500 transition">Category</a></li>
+          <li><Link to="/" className="hover:text-orange-500 transition">Home</Link></li>
+          <li><Link to="/shop" className="hover:text-orange-500 transition">Product</Link></li>
+          <li><Link to="/featured" className="hover:text-orange-500 transition">Category</Link></li>
         </ul>
+
 
         {/* Search Bar (Hidden on mobile) */}
         <div className="hidden md:block relative flex-1 max-w-md mx-6">
@@ -33,7 +34,7 @@ const Navbar = () => {
         {/* Icons + Hamburger */}
         <div className="flex items-center gap-4 md:gap-6">
           <div className="hidden md:flex gap-4 text-gray-800 text-lg">
-            <Link to="/signin">
+            <Link to="signin">
                <User className="cursor-pointer hover:text-orange-500 transition-colors" size={20} />
             </Link>
             <Heart className="cursor-pointer hover:text-orange-500 transition-colors" size={20} />
@@ -48,22 +49,22 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
-      {menuOpen && (
-        <div className="md:hidden mt-4 px-4 space-y-4 animate-slideDown">
-          <a href="/" className="block text-lg hover:text-orange-500">Home</a>
-          <a href="/shop" className="block text-lg hover:text-orange-500">Product</a>
-          <a href="/featured" className="block text-lg hover:text-orange-500">Category</a>
+     {menuOpen && (
+  <div className="md:hidden mt-4 px-4 space-y-4 animate-slideDown">
+    <Link to="/" className="block text-lg hover:text-orange-500">Home</Link>
+    <Link to="/shop" className="block text-lg hover:text-orange-500">Product</Link>
+    <Link to="/featured" className="block text-lg hover:text-orange-500">Category</Link>
 
-          {/* Optional: Add icons in mobile menu */}
-          <div className="flex gap-4 pt-4 border-t border-gray-200 text-gray-800">
-             <Link to="/signin">
-                <User className="cursor-pointer hover:text-orange-500" size={20} />
-             </Link>
-            <Heart className="cursor-pointer hover:text-orange-500" size={20} />
-            <ShoppingCart className="cursor-pointer hover:text-orange-500" size={20} />
-          </div>
-        </div>
-      )}
+    <div className="flex gap-4 pt-4 border-t border-gray-200 text-gray-800">
+      <Link to="/signin">
+        <User className="cursor-pointer hover:text-orange-500" size={20} />
+      </Link>
+      <Heart className="cursor-pointer hover:text-orange-500" size={20} />
+      <ShoppingCart className="cursor-pointer hover:text-orange-500" size={20} />
+    </div>
+  </div>
+)}
+
     </nav>
   );
 };

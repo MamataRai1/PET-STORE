@@ -15,7 +15,9 @@ from .views import (
     OrderItemViewSet,
     PaymentViewSet,
     ReviewViewSet,
-    UserViewSet
+    UserViewSet,
+    BannerImageView,
+    ProductViewSet
 )
 from rest_framework.routers import DefaultRouter
 
@@ -35,6 +37,8 @@ router.register(r'order', OrderViewSet, basename='order'),
 router.register(r'order-item', OrderItemViewSet, basename='order-item'),
 router.register(r'payment', PaymentViewSet, basename='payment'),
 router.register(r'review', ReviewViewSet, basename='review'),
+router.register(r'product', ProductViewSet, basename='product'),
+
 
 
 
@@ -42,5 +46,6 @@ router.register(r'review', ReviewViewSet, basename='review'),
 urlpatterns = [
     path('',index, name='index'),
     path('api/', include(router.urls)),
+    path('api/images/banner', BannerImageView.as_view(), name='banner-image'),
    
 ]

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import (User,Product, PhoneNumber, Address, Category,Brand, ProductCategory,ProductImage,ProductAttribute,Variant,Cart,CartItem,Order, OrderItem, Payment,Review)
+from .models import (User,Product, PhoneNumber, Address, Category,Brand, ProductCategory,ProductImage,ProductAttribute,Variant,Cart,CartItem,Order, OrderItem, Payment,Review, BannerImage)
 
 admin.site.register(User)
 admin.site.register(Product)
@@ -17,3 +17,4 @@ admin.site.register(Order)
 admin.site.register(OrderItem)
 admin.site.register(Payment)
 admin.site.register(Review)
+admin.site.register(BannerImage)  # Registering BannerImage model

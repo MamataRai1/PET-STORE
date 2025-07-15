@@ -240,3 +240,11 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user} review on {self.product}"
+
+
+class BannerImage(models.Model):
+    image = models.ImageField(upload_to='banners/')
+    alt_text = models.CharField(max_length=120, blank=True)
+
+    def __str__(self):
+        return self.alt_text or f"Banner {self.id}"

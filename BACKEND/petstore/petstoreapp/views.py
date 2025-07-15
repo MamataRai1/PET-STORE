@@ -3,17 +3,19 @@ from django.http import HttpResponse
 from .models import (
     PhoneNumber, Address, Category, Brand, Product, ProductCategory,
     ProductImage, ProductAttribute, Variant, Cart, CartItem, Order,
-    OrderItem, Payment, Review
+    OrderItem, Payment, Review, BannerImage
 )
 from .serializers import (
     PhoneNumberSerializer, AddressSerializer, CategorySerializer,   
     BrandSerializer, ProductCategorySerializer, ProductImageSerializer,
     ProductAttributeSerializer, VariantSerializer, CartSerializer,
     CartItemSerializer, OrderSerializer, OrderItemSerializer,
-    PaymentSerializer, ReviewSerializer ,UserSerializer
+    PaymentSerializer, ReviewSerializer ,UserSerializer, BannerImageSerializer,ProductSerializer
 )    
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets
+from rest_framework.views import APIView
+from rest_framework.response import Response
 User = get_user_model()
 
 
@@ -39,6 +41,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
 class ProductCategoryViewSet(viewsets.ModelViewSet):
     queryset = ProductCategory.objects.all()
@@ -80,3 +86,10 @@ class PaymentViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+
+class BannerImageView(APIView):
+    def get(self, request):
+        banner = BannerImage.objects.first()
+        serializer = BannerImageSerializer(banner, context={'request': request})
+        return Response(serializer.data)

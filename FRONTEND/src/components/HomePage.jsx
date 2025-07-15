@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { PawPrint, ShoppingBag } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import bdogImg from "./assets/bdog.jpg";
+import catImg from "./assets/cat.jpg";
+import rabbitImg from "./assets/rabbit.jpg";
 
 export default function LandingPage() {
   const [bannerImage, setBannerImage] = useState("");
@@ -9,47 +12,44 @@ export default function LandingPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchImage = async () => {
+    // Define an async function inside useEffect
+    const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/images/banner");
-        setBannerImage(response.data.image_url);
-      } catch (error) {
-        console.error("Failed to fetch image:", error);
-      }
-    };
-    fetchImage();
-  }, []);
+        // Fetch banner image and products in parallel
+        const [bannerResponse, productsResponse] = await Promise.all([
+          axios.get("http://localhost:8000/api/images/banner"),
+          axios.get("http://localhost:8000/api/product"),
+        ]);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get("http://localhost:8000/api/products/new");
-        setProducts(response.data);
+        // Set states from API response
+        setBannerImage(bannerResponse.data.image_url);
+        setProducts(productsResponse.data);
       } catch (error) {
-        console.error("Failed to fetch products:", error);
+        console.error("Failed to fetch data:", error);
       }
     };
-    fetchProducts();
+
+    fetchData();
   }, []);
 
   const petItems = [
     {
       id: 1,
-      label: "SHOP CAT",
-      image: "https://images.unsplash.com/photo-1583337130417-3346a1e4a27b",
-      link: "/shop/cat",
-    },
-    {
-      id: 2,
-      label: "SHOP DOG",
-      image: "https://images.unsplash.com/photo-1596496051033-6f86e367a257",
+      label: "SHOP ",
+      image: bdogImg,
       link: "/shop/dog",
     },
     {
+      id: 2,
+      label: "SHOP ",
+      image: catImg ,
+      link: "/shop/cat",
+    },
+    {
       id: 3,
-      label: "SHOP NOW",
-      image: "https://images.unsplash.com/photo-1619983081563-430f63602748",
-      link: "/shop",
+      label: "SHOP ",
+      image: rabbitImg,
+      link: "/shop/rabbit",
     },
   ];
 
@@ -95,7 +95,11 @@ export default function LandingPage() {
         </h3>
         <div className="flex flex-col md:flex-row justify-center gap-8">
           {petItems.map((item) => (
-            <div key={item.id} className="flex flex-col items-center gap-4 cursor-pointer" onClick={() => navigate(item.link)}>
+            <div
+              key={item.id}
+              className="flex flex-col items-center gap-4 cursor-pointer"
+              onClick={() => navigate(item.link)}
+            >
               <img
                 src={item.image}
                 alt={item.label}

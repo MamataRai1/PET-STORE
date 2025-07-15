@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from .models import (
     PhoneNumber, Address, Category, Brand, Product, ProductCategory,
     ProductImage, ProductAttribute, Variant, Cart, CartItem,
-    Order, OrderItem, Payment, Review
+    Order, OrderItem, Payment, Review, BannerImage
 )
 
 User = get_user_model()
@@ -164,3 +164,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = ['id', 'product', 'user', 'rating', 'title', 'comment', 'created_at']
         read_only_fields = ['created_at', 'user', 'product']
+
+class BannerImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BannerImage
+        fields = ['id', 'image_url', 'alt_text']
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        return None
