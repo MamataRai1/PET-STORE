@@ -11,6 +11,7 @@ const SignUpPage = () => {
     address: "",
   });
   const [role, setRole] = useState("customer");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,6 +22,7 @@ const SignUpPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const dataToSend = {
       ...formData,
@@ -28,13 +30,34 @@ const SignUpPage = () => {
       is_seller: role === "seller",
     };
 
+    console.log("Sending user data:", dataToSend);
+
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/users/", dataToSend);
+      const res = await axios.post(
+        "http://127.0.0.1:8000/api/users/",
+        dataToSend,
+        { headers: { "Content-Type": "application/json" } }
+      );
       alert("User registered successfully!");
-      console.log(res.data);
+      console.log("Response data:", res.data);
+      // Optionally, clear form or redirect user here
+      setFormData({
+        username: "",
+        email: "",
+        password: "",
+        phone: "",
+        address: "",
+      });
     } catch (err) {
-      console.error(err);
-      alert("Registration failed. Check the console.");
+      console.error("Backend validation error:", err.response?.data);
+      alert(
+        "Registration failed: " +
+          (err.response?.data
+            ? JSON.stringify(err.response.data)
+            : err.message)
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,8 +104,12 @@ const SignUpPage = () => {
               onChange={handleChange}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
               required
+              disabled={loading}
             />
-            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <User
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={18}
+            />
           </div>
 
           <div className="relative">
@@ -94,8 +121,12 @@ const SignUpPage = () => {
               onChange={handleChange}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
               required
+              disabled={loading}
             />
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Mail
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={18}
+            />
           </div>
 
           <div className="relative">
@@ -107,8 +138,12 @@ const SignUpPage = () => {
               onChange={handleChange}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
               required
+              disabled={loading}
             />
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Lock
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={18}
+            />
           </div>
 
           <div className="relative">
@@ -120,8 +155,12 @@ const SignUpPage = () => {
               onChange={handleChange}
               maxLength={10}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none"
+              disabled={loading}
             />
-            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Phone
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              size={18}
+            />
           </div>
 
           <div className="relative">
@@ -132,15 +171,21 @@ const SignUpPage = () => {
               onChange={handleChange}
               rows="2"
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:outline-none resize-none"
+              disabled={loading}
             />
             <MapPin className="absolute left-3 top-3 text-gray-400" size={18} />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-semibold"
+            disabled={loading}
+            className={`w-full py-2 rounded-lg font-semibold ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-orange-500 hover:bg-orange-600 text-white"
+            }`}
           >
-            Sign Up as {role}
+            {loading ? "Signing up..." : `Sign Up as ${role}`}
           </button>
         </form>
 

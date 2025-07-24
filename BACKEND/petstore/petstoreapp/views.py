@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from .models import (
     PhoneNumber, Address, Category, Brand, Product, ProductCategory,
     ProductImage, ProductAttribute, Variant, Cart, CartItem, Order,
-    OrderItem, Payment, Review, BannerImage
+    OrderItem, Payment, Review, BannerImage,UserProfile
 )
 from .serializers import (
     PhoneNumberSerializer, AddressSerializer, CategorySerializer,   
@@ -17,6 +17,10 @@ from django.contrib.auth import get_user_model
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny
 
 User = get_user_model()
 
@@ -30,6 +34,46 @@ def index(request):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class SignUpView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = request.data
+        username = data.get("username")
+        email = data.get("email")
+        password = data.get("password")
+        phone = data.get("phone")
+        address = data.get("address")
+        is_customer = data.get("is_customer", True)
+        is_seller = data.get("is_seller", False)
+
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Username already taken"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.create_user(username=username, email=email, password=password)
+        profile = user.userprofile
+        profile.phone = phone
+        profile.address = address
+        profile.is_customer = is_customer
+        profile.is_seller = is_seller
+        profile.save()
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "user": {
+                "username": user.username,
+                "email": user.email,
+                "phone": profile.phone,
+                "address": profile.address,
+                "is_customer": profile.is_customer,
+                "is_seller": profile.is_seller,
+            },
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+        }, status=status.HTTP_201_CREATED)
 
 
 # ---------- PHONE & ADDRESS ---------- #

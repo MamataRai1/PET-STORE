@@ -6,6 +6,8 @@ import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import ShopPAge from './pages/ShopPAge';
 import ProductPage from './components/ProductCard';
+import LandingPages from './page/LandingPages';
+import PrivateRoute from './PrivateRoute';
 
 
 const routes = [
@@ -15,12 +17,20 @@ const routes = [
     children: [
       { index: true, element: <HomePage /> },
       {
-        path: 'signin',
+        path: 'login',
         element: <SignInPage />
       },
       { path: 'signup', element: <SignUpPage /> },
       { path: 'shop', element: <ShopPAge /> },
-      { path: 'product/:id', element: <ProductPage /> },  // Add this route
+      { path: 'product/:id', element: <ProductPage /> },
+
+
+      { path: 'dashboard', element: <PrivateRoute />
+        , children: [
+          { index: true, element: <LandingPages /> },
+          // Add more private routes here if needed
+        ],
+      }, 
        
 
     ],

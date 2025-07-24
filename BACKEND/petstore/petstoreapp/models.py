@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission,User
 from decimal import Decimal
 
 
@@ -31,6 +31,16 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    is_customer = models.BooleanField(default=True)
+    is_seller = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.username
 
 class PhoneNumber(models.Model):
     """A phone number can be used by many users (e.g., family)."""

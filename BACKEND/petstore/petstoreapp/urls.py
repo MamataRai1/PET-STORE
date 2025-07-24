@@ -17,7 +17,8 @@ from .views import (
     ReviewViewSet,
     UserViewSet,
     BannerImageView,
-    ProductViewSet
+    ProductViewSet,
+    SignUpView
 )
 from rest_framework.routers import DefaultRouter
 
@@ -47,5 +48,6 @@ urlpatterns = [
     path('',index, name='index'),
     path('api/', include(router.urls)),
     path('api/images/banner', BannerImageView.as_view(), name='banner-image'),
+    path ('users/', SignUpView.as_view(), name='signup'), 
    
 ]
