@@ -1,41 +1,35 @@
-from django.shortcuts import render
 from django.http import HttpResponse
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
+from rest_framework import status, viewsets
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from .models import (
     PhoneNumber, Address, Category, Brand, Product, ProductCategory,
     ProductImage, ProductAttribute, Variant, Cart, CartItem, Order,
-    OrderItem, Payment, Review, BannerImage,UserProfile
+    OrderItem, Payment, Review, BannerImage
 )
 from .serializers import (
-    PhoneNumberSerializer, AddressSerializer, CategorySerializer,   
+    PhoneNumberSerializer, AddressSerializer, CategorySerializer,
     BrandSerializer, ProductCategorySerializer, ProductImageSerializer,
     ProductAttributeSerializer, VariantSerializer, CartSerializer,
     CartItemSerializer, OrderSerializer, OrderItemSerializer,
     PaymentSerializer, ReviewSerializer, UserSerializer,
     BannerImageSerializer, ProductSerializer
-)    
-from django.contrib.auth import get_user_model
-from rest_framework import viewsets
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth.models import User
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import AllowAny
+)
 
 User = get_user_model()
 
 
-# ---------- Basic Welcome View ---------- #
+# ---------- Welcome ---------- #
 def index(request):
-    return HttpResponse("Welcome to the Pet Store API. Please use the endpoints provided in the documentation to interact with the API.")
+    return HttpResponse("Welcome to the Pet Store API.")
 
 
-# ---------- USER ---------- #
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
+# ---------- Signup View ---------- #
 class SignUpView(APIView):
     permission_classes = [AllowAny]
 
@@ -53,12 +47,15 @@ class SignUpView(APIView):
             return Response({"error": "Username already taken"}, status=status.HTTP_400_BAD_REQUEST)
 
         user = User.objects.create_user(username=username, email=email, password=password)
-        profile = user.userprofile
-        profile.phone = phone
-        profile.address = address
-        profile.is_customer = is_customer
-        profile.is_seller = is_seller
-        profile.save()
+        
+        # Optional: Auto-create UserProfile (if not handled by signal)
+        profile = getattr(user, "userprofile", None)
+        if profile:
+            profile.phone = phone
+            profile.address = address
+            profile.is_customer = is_customer
+            profile.is_seller = is_seller
+            profile.save()
 
         refresh = RefreshToken.for_user(user)
 
@@ -66,17 +63,39 @@ class SignUpView(APIView):
             "user": {
                 "username": user.username,
                 "email": user.email,
-                "phone": profile.phone,
-                "address": profile.address,
-                "is_customer": profile.is_customer,
-                "is_seller": profile.is_seller,
+                "phone": profile.phone if profile else "",
+                "address": profile.address if profile else "",
+                "is_customer": profile.is_customer if profile else False,
+                "is_seller": profile.is_seller if profile else False,
             },
             "access": str(refresh.access_token),
             "refresh": str(refresh),
         }, status=status.HTTP_201_CREATED)
 
 
-# ---------- PHONE & ADDRESS ---------- #
+# ---------- User Profile View ---------- #
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        profile = user.userprofile
+        data = {
+            "username": user.username,
+            "email": user.email,
+            "phone": profile.phone,
+            "address": profile.address,
+            "is_customer": profile.is_customer,
+            "is_seller": profile.is_seller
+        }
+        return Response(data)
+
+
+# ---------- Generic ViewSets ---------- #
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
 class PhoneNumberViewSet(viewsets.ModelViewSet):
     queryset = PhoneNumber.objects.all()
     serializer_class = PhoneNumberSerializer
@@ -85,8 +104,6 @@ class AddressViewSet(viewsets.ModelViewSet):
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
 
-
-# ---------- PRODUCT STRUCTURE ---------- #
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -111,8 +128,6 @@ class VariantViewSet(viewsets.ModelViewSet):
     queryset = Variant.objects.all()
     serializer_class = VariantSerializer
 
-
-# ✅ UPDATED: PRODUCT VIEWSET with context
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -120,8 +135,6 @@ class ProductViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
         return {'request': self.request}
 
-
-# ---------- CART & ORDER ---------- #
 class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
@@ -138,8 +151,6 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
 
-
-# ---------- PAYMENT & REVIEW ---------- #
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
@@ -149,7 +160,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
 
 
-# ✅ UPDATED: BANNER IMAGE with request context
+# ---------- Banner View ---------- #
 class BannerImageView(APIView):
     def get(self, request):
         banner = BannerImage.objects.first()

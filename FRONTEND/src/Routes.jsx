@@ -17,7 +17,7 @@ const routes = [
     children: [
       { index: true, element: <HomePage /> },
       {
-        path: 'login',
+        path: 'signin',
         element: <SignInPage />
       },
       { path: 'signup', element: <SignUpPage /> },
@@ -25,7 +25,7 @@ const routes = [
       { path: 'product/:id', element: <ProductPage /> },
 
 
-      { path: 'dashboard', element: <PrivateRoute />
+      { path: 'login', element: <PrivateRoute />
         , children: [
           { index: true, element: <LandingPages /> },
           // Add more private routes here if needed

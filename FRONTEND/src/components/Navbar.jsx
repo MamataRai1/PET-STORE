@@ -56,7 +56,7 @@ const Navbar = () => {
     <Link to="/featured" className="block text-lg hover:text-orange-500">Category</Link>
 
     <div className="flex gap-4 pt-4 border-t border-gray-200 text-gray-800">
-      <Link to="/signin">
+      <Link to="signin" className="flex items-center gap-2">
         <User className="cursor-pointer hover:text-orange-500" size={20} />
       </Link>
       <Heart className="cursor-pointer hover:text-orange-500" size={20} />

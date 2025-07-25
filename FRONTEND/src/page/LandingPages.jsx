@@ -27,20 +27,23 @@ export default function LandingPage() {
 
     const fetchData = async () => {
       try {
-        const [bannerResponse, productsResponse, userResponse] = await Promise.all([
+        const [bannerRes, productRes, profileRes] = await Promise.all([
           axios.get("http://localhost:8000/api/images/banner"),
           axios.get("http://localhost:8000/api/product"),
           axios.get("http://localhost:8000/api/user/profile/", {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${token}`, // ✅ Correct Bearer format
             },
           }),
         ]);
-        setBannerImage(bannerResponse.data.image_url);
-        setProducts(productsResponse.data);
-        setUser(userResponse.data);
-      } catch (error) {
-        console.error("Error fetching homepage data:", error);
+
+        setBannerImage(bannerRes.data.image_url);
+        setProducts(productRes.data);
+        setUser(profileRes.data);
+        console.log("Profile data:", profileRes.data); // ✅ Log for debugging
+      } catch (err) {
+        console.error("Error fetching homepage data:", err);
+        localStorage.removeItem("token");
         navigate("/login");
       }
     };
@@ -68,18 +71,18 @@ export default function LandingPage() {
         </button>
       </header>
 
-      {/* User Profile Section */}
+      {/* User Profile */}
       {user && (
         <section className="bg-white rounded-2xl shadow-md p-6 mb-12 max-w-2xl mx-auto">
           <h3 className="text-xl font-bold text-gray-800 mb-4">👤 Your Profile</h3>
-          <p><strong>Name:</strong> {user.name}</p>
+          <p><strong>Username:</strong> {user.username}</p>
           <p><strong>Email:</strong> {user.email}</p>
           <p><strong>Phone:</strong> {user.phone}</p>
           <p><strong>Address:</strong> {user.address}</p>
         </section>
       )}
 
-      {/* Banner & Intro */}
+      {/* Hero Banner */}
       <main className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
         <div>
           <h2 className="text-5xl font-extrabold text-gray-800 leading-tight mb-6">
@@ -108,7 +111,7 @@ export default function LandingPage() {
         </div>
       </main>
 
-      {/* Pet Categories */}
+      {/* Categories */}
       <section className="mt-20">
         <h3 className="text-2xl font-bold mb-8 text-center text-gray-800">
           Choose by Pet Type 🐾
@@ -133,7 +136,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Products Section */}
+      {/* Products */}
       <section className="mt-20">
         <p className="text-green-700 text-center font-medium uppercase tracking-wide">
           Special Product
@@ -192,7 +195,7 @@ export default function LandingPage() {
           Why Pet Lovers Choose Us 🐶
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {[
+          {[ 
             { title: "Trusted Products", desc: "Only the best brands for your pets." },
             { title: "Fast Delivery", desc: "We deliver straight to your doorstep." },
             { title: "Affordable Prices", desc: "Great value without compromising quality." },

@@ -6,7 +6,7 @@ import bdogImg from "./assets/bdog.jpg";
 import catImg from "./assets/cat.jpg";
 import rabbitImg from "./assets/rabbit.jpg";
 
-export default function LandingPage() {
+export default function HomePage() {
   const [bannerImage, setBannerImage] = useState("");
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();

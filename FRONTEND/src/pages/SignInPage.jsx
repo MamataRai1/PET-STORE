@@ -27,9 +27,14 @@ const SignInPage = () => {
         password: formData.password,
       });
 
-      localStorage.setItem("token", res.data.access);
+      // ✅ Store token in localStorage
+      localStorage.setItem("access", res.data.access);
+      localStorage.setItem("refresh", res.data.refresh);
+
       alert("Login successful!");
-      navigate("/dashboard");  // Redirect to dashboard after login success
+      
+      console.log("Token in localStorage:", localStorage.getItem("access"));
+      navigate("/login");
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
       alert("Login failed! Please check your credentials.");
@@ -117,10 +122,12 @@ const SignInPage = () => {
           </button>
         </form>
 
-        <p>
-           Don’t have an account?{" "}
-           <Link to="/signup" className="text-orange-500 hover:underline">Sign up</Link>
-         </p>
+        <p className="text-center mt-4">
+          Don’t have an account?{" "}
+          <Link to="/signup" className="text-orange-500 hover:underline">
+            Sign up
+          </Link>
+        </p>
       </div>
     </div>
   );
