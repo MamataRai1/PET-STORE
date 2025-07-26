@@ -85,17 +85,20 @@ class VariantSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     brand = BrandSerializer(read_only=True)
+    brand_id = serializers.PrimaryKeyRelatedField(
+        queryset=Brand.objects.all(), source='brand', write_only=True
+    )
     images = ProductImageSerializer(many=True, read_only=True)
     attributes = ProductAttributeSerializer(many=True, read_only=True)
     variants = VariantSerializer(many=True, read_only=True)
     main_image_url = serializers.SerializerMethodField()
-    stock = serializers.IntegerField( )
+    stock = serializers.IntegerField()
 
     class Meta:
         model = Product
         fields = [
             'id', 'sku', 'name', 'main_image', 'main_image_url', 'description',
-            'brand', 'categories', 'price', 'stock', 'created_at', 'updated_at', 'is_active',
+            'brand', 'brand_id', 'categories', 'price', 'stock', 'created_at', 'updated_at', 'is_active',
             'images', 'attributes', 'variants'
         ]
 

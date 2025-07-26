@@ -13,7 +13,7 @@ const ProductForm = () => {
     description: "",
     price: "",
     brand: "",
-    categories: [],   // array of category IDs for M2M
+    categories: [],
     stock: 0,
     is_active: true,
     image: null,
@@ -21,8 +21,6 @@ const ProductForm = () => {
 
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
-
-  // For image preview
   const [imagePreview, setImagePreview] = useState(null);
 
   // Fetch brands and categories on mount
@@ -59,7 +57,7 @@ const ProductForm = () => {
             categories: data.categories || [],
             stock: data.stock,
             is_active: data.is_active,
-            image: null, // clear file input
+            image: null,
           });
           if (data.main_image) {
             setImagePreview(`http://127.0.0.1:8000${data.main_image}`);
@@ -99,12 +97,17 @@ const ProductForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.brand) {
+      alert("Please select a brand.");
+      return;
+    }
+
     const form = new FormData();
     form.append("sku", formData.sku);
     form.append("name", formData.name);
     form.append("description", formData.description);
     form.append("price", formData.price);
-    form.append("brand", Number(formData.brand));
+    form.append("brand_id", Number(formData.brand)); // ✅ CORRECT
     form.append("stock", formData.stock);
     form.append("is_active", formData.is_active);
 
@@ -123,6 +126,23 @@ const ProductForm = () => {
     const method = isEditMode ? "PATCH" : "POST";
     const token = localStorage.getItem("access");
 
+    console.log("Submitting product:", {
+      ...formData,
+      brand: Number(formData.brand),
+      categories: formData.categories,
+    });
+    console.log("FormData values:", {
+      sku: formData.sku,
+      name: formData.name,
+      description: formData.description,
+      price: formData.price,
+      brand: Number(formData.brand),
+      stock: formData.stock,
+      is_active: formData.is_active,
+      categories: formData.categories,
+      image: formData.image,
+    });
+
     try {
       const response = await fetch(url, {
         method,
@@ -131,7 +151,7 @@ const ProductForm = () => {
       });
       if (response.ok) {
         alert(`Product ${isEditMode ? "updated" : "created"} successfully!`);
-        navigate("/admin/products");
+        navigate("/admin/product-list");
       } else {
         const errorText = await response.text();
         alert("Error: " + errorText);
@@ -209,7 +229,6 @@ const ProductForm = () => {
             value={formData.brand}
             onChange={handleChange}
             required
-            className="w-full border px-3 py-2 rounded"
           >
             <option value="">Select Brand</option>
             {brands.map((b) => (

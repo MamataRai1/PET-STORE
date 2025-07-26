@@ -17,9 +17,12 @@ export default function Categories() {
   const fetchCategories = async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/categories/")
+      const token = localStorage.getItem("access")
+      const response = await fetch("http://127.0.0.1:8000/api/category/", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
       const data = await response.json()
-      setCategories(data.results || data.categories || [])
+      setCategories(Array.isArray(data) ? data : data.results || [])
     } catch (error) {
       console.error("Error fetching categories:", error)
       setCategories([])
@@ -31,12 +34,18 @@ export default function Categories() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const url = editingCategory ? `/api/categories/${editingCategory.id}/` : "/api/categories/"
+      const token = localStorage.getItem("access")
+      const url = editingCategory
+        ? `http://127.0.0.1:8000/api/category/${editingCategory.id}/`
+        : "http://127.0.0.1:8000/api/category/"
       const method = editingCategory ? "PUT" : "POST"
 
       await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(formData),
       })
 
@@ -53,7 +62,11 @@ export default function Categories() {
   const deleteCategory = async (categoryId) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
-        await fetch(`/api/categories/${categoryId}/`, { method: "DELETE" })
+        const token = localStorage.getItem("access")
+        await fetch(`http://127.0.0.1:8000/api/category/${categoryId}/`, {
+          method: "DELETE",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        })
         await fetchCategories()
       } catch (error) {
         console.error("Error deleting category:", error)
@@ -112,9 +125,6 @@ export default function Categories() {
               </div>
             </div>
             <p className="text-gray-600 text-sm mb-4">{category.description || "No description"}</p>
-            <div className="text-sm text-gray-500">
-              <p>{category.product_count || 0} products</p>
-            </div>
           </div>
         ))}
       </div>
