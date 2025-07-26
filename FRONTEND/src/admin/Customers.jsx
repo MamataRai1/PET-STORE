@@ -6,26 +6,27 @@ import { Search, Filter } from "lucide-react"
 export default function Customers() {
   const [customers, setCustomers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
   const [searchTerm, setSearchTerm] = useState("")
+
+  // No pagination since backend returns a plain array
+  // You can implement client-side pagination if needed
 
   useEffect(() => {
     fetchCustomers()
-  }, [currentPage, searchTerm])
+  }, [searchTerm]) // refetch when searchTerm changes
 
   const fetchCustomers = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/customers/?page=${currentPage}&search=${searchTerm}`)
+      // Adjust API URL and params as needed
+      const response = await fetch(`http://127.0.0.1:8000/api/users/?search=${encodeURIComponent(searchTerm)}`)
       const data = await response.json()
 
-      setCustomers(data.results || data.customers || [])
-      setTotalPages(Math.ceil((data.count || data.total || 0) / 10))
+      // Backend returns plain array of users
+      setCustomers(data)
     } catch (error) {
       console.error("Error fetching customers:", error)
       setCustomers([])
-      setTotalPages(1)
     } finally {
       setLoading(false)
     }
@@ -34,10 +35,11 @@ export default function Customers() {
   const deleteCustomer = async (customerId) => {
     if (window.confirm("Are you sure you want to delete this customer?")) {
       try {
-        const response = await fetch(`/api/customers/${customerId}/`, {
+        const response = await fetch(`http://127.0.0.1:8000/api/users/${customerId}/`, {
           method: "DELETE",
         })
         if (!response.ok) throw new Error("Failed to delete customer")
+        // Refresh the list after deletion
         fetchCustomers()
       } catch (error) {
         console.error("Error deleting customer:", error)
@@ -69,10 +71,7 @@ export default function Customers() {
               type="text"
               placeholder="Search customers..."
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setCurrentPage(1) // reset to first page on search change
-              }}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
@@ -94,10 +93,10 @@ export default function Customers() {
                 Email
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Orders
+                Phone
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Total Spent
+                Address
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
@@ -115,18 +114,18 @@ export default function Customers() {
                     <div className="flex items-center space-x-3">
                       <img
                         src={customer.avatar || "/placeholder.svg?height=40&width=40"}
-                        alt={customer.name}
+                        alt={customer.username}
                         className="w-10 h-10 rounded-full object-cover"
                       />
                       <div>
-                        <p className="font-medium text-gray-900">{customer.name}</p>
+                        <p className="font-medium text-gray-900">{customer.username}</p>
                         <p className="text-sm text-gray-600">ID: {customer.id}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-600">{customer.email}</td>
-                  <td className="px-6 py-4 text-gray-900">{customer.total_orders || 0}</td>
-                  <td className="px-6 py-4 text-gray-900">${customer.total_spent || 0}</td>
+                  <td className="px-6 py-4 text-gray-600">{customer.phone}</td>
+                  <td className="px-6 py-4 text-gray-600">{customer.address}</td>
                   <td className="px-6 py-4">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -158,27 +157,6 @@ export default function Customers() {
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Pagination controls */}
-      <div className="mt-6 flex justify-center space-x-2">
-        <button
-          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-          disabled={currentPage === 1}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span className="px-3 py-1 border rounded">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1 border rounded disabled:opacity-50"
-        >
-          Next
-        </button>
       </div>
     </div>
   )

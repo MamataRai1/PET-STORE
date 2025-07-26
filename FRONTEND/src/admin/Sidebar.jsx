@@ -36,14 +36,19 @@ export default function Sidebar({ activeSection, setActiveSection }) {
     { id: "settings", label: "Settings", icon: Settings },
   ]
 
+  // Logout handler with confirmation
   const handleLogout = () => {
-    localStorage.removeItem("adminToken")
-    window.location.href = "/admin/login"
+    if (window.confirm("Are you sure you want to logout?")) {
+      // Remove stored token or any auth data
+      localStorage.removeItem("adminToken")
+      // Redirect user to login page
+      window.location.href = "/login"
+    }
   }
 
   return (
     <div className="w-64 bg-gray-50 border-r border-gray-200 h-screen flex flex-col">
-      {/* Logo */}
+      {/* Logo Section */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
@@ -53,7 +58,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation Menu */}
       <nav className="flex-1 p-4 overflow-y-auto">
         <ul className="space-y-2">
           {menuItems.map((item) => (
@@ -68,7 +73,8 @@ export default function Sidebar({ activeSection, setActiveSection }) {
                     }
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeSection === item.id || (item.hasSubmenu && ["product-list", "categories"].includes(activeSection))
+                    activeSection === item.id ||
+                    (item.hasSubmenu && ["product-list", "categories"].includes(activeSection))
                       ? "bg-purple-100 text-purple-700"
                       : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                   }`}
@@ -78,9 +84,14 @@ export default function Sidebar({ activeSection, setActiveSection }) {
                     <span>{item.label}</span>
                   </div>
                   {item.hasSubmenu &&
-                    (productsExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />)}
+                    (productsExpanded ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    ))}
                 </button>
 
+                {/* Submenu */}
                 {item.hasSubmenu && productsExpanded && (
                   <ul className="mt-2 ml-8 space-y-1">
                     {item.submenu.map((subItem) => (
@@ -105,7 +116,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
         </ul>
       </nav>
 
-      {/* Logout */}
+      {/* Logout Button */}
       <div className="p-4 border-t border-gray-200">
         <button
           onClick={handleLogout}

@@ -8,6 +8,7 @@ import ProductList from "./Product-List"
 import ProductForm from "./product-form"
 import Categories from "./categories"
 import Customers from "./Customers"
+import Sales from "./Sales"  // <-- Make sure this is imported
 
 export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState("dashboard")
@@ -30,7 +31,6 @@ export default function AdminPanel() {
   }
 
   const handleSaveProduct = (product) => {
-    // Product saved successfully - you can add more logic here
     console.log("Product saved:", product)
   }
 
@@ -43,12 +43,7 @@ export default function AdminPanel() {
       case "categories":
         return <Categories />
       case "sales":
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold text-gray-900">Sales</h1>
-            <p className="text-gray-600 mt-1">View sales reports and analytics</p>
-          </div>
-        )
+        return <Sales />    
       case "customers":
         return <Customers />
       case "analytics":
