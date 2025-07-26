@@ -6,11 +6,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Sum, Count
+from rest_framework.decorators import api_view
 
 from .models import (
     PhoneNumber, Address, Category, Brand, Product, ProductCategory,
     ProductImage, ProductAttribute, Variant, Cart, CartItem, Order,
-    OrderItem, Payment, Review, BannerImage
+    OrderItem, Payment, Review, BannerImage,User
 )
 from .serializers import (
     PhoneNumberSerializer, AddressSerializer, CategorySerializer,
@@ -90,6 +92,52 @@ class UserProfileView(APIView):
         }
         return Response(data)
 
+@api_view(['GET'])
+def admin_dashboard(request):
+    total_products = Product.objects.count()
+    total_sales = Order.objects.aggregate(total=Sum('total_amount'))['total'] or 0
+    total_customers = User.objects.filter(order__isnull=False).distinct().count()
+
+    # Recent 5 orders ordered by placed_at
+    recent_orders = Order.objects.select_related('user').order_by('-placed_at')[:5]
+    orders_data = [
+        {
+            "id": order.id,
+            "customer_name": order.user.username if order.user else "Unknown",
+            "total": order.total_amount,
+            "status": order.status,
+        }
+        for order in recent_orders
+    ]
+
+    # Top 5 products by total sold count (through variants -> orderitems)
+    top_products = Product.objects.annotate(
+        sold_count=Count('variants__orderitem')
+    ).order_by('-sold_count')[:5]
+
+    top_products_data = []
+    for p in top_products:
+        total_revenue = OrderItem.objects.filter(
+            variant__product=p
+        ).aggregate(rev=Sum('unit_price'))['rev'] or 0
+
+        top_products_data.append({
+            "id": p.id,
+            "name": p.name,
+            "category": p.categories.first().name if p.categories.exists() else '',
+            "image": p.main_image.url if p.main_image else None,
+            "sold_count": p.sold_count,
+            "total_revenue": total_revenue,
+        })
+
+    return Response({
+        "total_products": total_products,
+        "total_sales": total_sales,
+        "total_customers": total_customers,
+        "analytics_score": 87,  # You can replace with real calculation
+        "recent_orders": orders_data,
+        "top_products": top_products_data,
+    })
 
 # ---------- Generic ViewSets ---------- #
 class UserViewSet(viewsets.ModelViewSet):

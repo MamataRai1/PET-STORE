@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { User, Lock, Mail, Phone, MapPin } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ const SignUpPage = () => {
   });
   const [role, setRole] = useState("customer");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +42,8 @@ const SignUpPage = () => {
       );
       alert("User registered successfully!");
       console.log("Response data:", res.data);
-      // Optionally, clear form or redirect user here
+
+      // Clear form after success
       setFormData({
         username: "",
         email: "",
@@ -48,6 +51,9 @@ const SignUpPage = () => {
         phone: "",
         address: "",
       });
+
+      // Redirect to login page after successful signup
+      navigate("/login");
     } catch (err) {
       console.error("Backend validation error:", err.response?.data);
       alert(
@@ -191,9 +197,9 @@ const SignUpPage = () => {
 
         <p className="text-center text-sm text-gray-500 mt-4">
           Already have an account?{" "}
-          <a href="/signin" className="text-orange-500 hover:underline">
+          <Link to="/login" className="text-orange-500 hover:underline">
             Sign in
-          </a>
+          </Link>
         </p>
       </div>
     </div>

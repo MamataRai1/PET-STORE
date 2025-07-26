@@ -27,14 +27,19 @@ const SignInPage = () => {
         password: formData.password,
       });
 
-      // ✅ Store token in localStorage
+      // Store tokens in localStorage
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
 
       alert("Login successful!");
-      
       console.log("Token in localStorage:", localStorage.getItem("access"));
-      navigate("/login");
+
+      // Role-based redirection
+      if (role === "customer") {
+        navigate("/admin-dashboard");  // Admin dashboard route
+      } else {
+        console.log("error") ;    // Customer dashboard route
+      }
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
       alert("Login failed! Please check your credentials.");

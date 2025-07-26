@@ -21,7 +21,7 @@ export default function LandingPage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login");
+      navigate("/signin");
       return;
     }
 
@@ -32,7 +32,7 @@ export default function LandingPage() {
           axios.get("http://localhost:8000/api/product"),
           axios.get("http://localhost:8000/api/user/profile/", {
             headers: {
-              Authorization: `Bearer ${token}`, // ✅ Correct Bearer format
+              Authorization: `Bearer ${token}`,
             },
           }),
         ]);
@@ -40,11 +40,11 @@ export default function LandingPage() {
         setBannerImage(bannerRes.data.image_url);
         setProducts(productRes.data);
         setUser(profileRes.data);
-        console.log("Profile data:", profileRes.data); // ✅ Log for debugging
+        console.log("Profile data:", profileRes.data);
       } catch (err) {
         console.error("Error fetching homepage data:", err);
         localStorage.removeItem("token");
-        navigate("/login");
+        navigate("/signin");
       }
     };
 
@@ -53,7 +53,7 @@ export default function LandingPage() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/signin");
   };
 
   return (
@@ -174,11 +174,11 @@ export default function LandingPage() {
                 <div className="text-center">
                   {product.discount ? (
                     <>
-                      <p className="text-orange-600 font-bold text-xl">R.S{product.price}</p>
-                      <p className="line-through text-gray-400 text-sm">R.S{product.original_price}</p>
+                      <p className="text-orange-600 font-bold text-xl">Rs. {product.price}</p>
+                      <p className="line-through text-gray-400 text-sm">Rs. {product.original_price}</p>
                     </>
                   ) : (
-                    <p className="font-semibold text-orange-600 text-xl">Rs.{product.price}</p>
+                    <p className="font-semibold text-orange-600 text-xl">Rs. {product.price}</p>
                   )}
                 </div>
               </div>

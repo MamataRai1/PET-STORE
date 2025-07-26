@@ -8,6 +8,7 @@ import ShopPAge from './pages/ShopPAge';
 import ProductPage from './components/ProductCard';
 import LandingPages from './page/LandingPages';
 import PrivateRoute from './PrivateRoute';
+import AdminPanel from './admin/admin-panel';
 
 
 const routes = [
@@ -16,23 +17,25 @@ const routes = [
     element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
-      {
-        path: 'signin',
-        element: <SignInPage />
-      },
-      { path: 'signup', element: <SignUpPage /> },
+      {  path: 'login',element: <SignInPage /> },
+      { path: 'signin', element: <SignUpPage /> },
       { path: 'shop', element: <ShopPAge /> },
       { path: 'product/:id', element: <ProductPage /> },
 
 
-      { path: 'login', element: <PrivateRoute />
+      { path: 'customer-dashboard', element: <PrivateRoute />
         , children: [
           { index: true, element: <LandingPages /> },
           // Add more private routes here if needed
         ],
       }, 
-       
-
+       {
+        path: 'admin-dashboard',
+        element: <PrivateRoute />,
+        children: [
+          { index: true, element: <AdminPanel/> },
+        ], 
+        },
     ],
   },
 ];

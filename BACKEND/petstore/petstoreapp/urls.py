@@ -6,7 +6,7 @@ from .views import (
     ProductAttributeViewSet, VariantViewSet, CartViewSet, CartItemViewSet,
     OrderViewSet, OrderItemViewSet, PaymentViewSet, ReviewViewSet,
     UserViewSet, ProductViewSet, BannerImageView, SignUpView,
-    UserProfileView
+    UserProfileView , admin_dashboard
 )
 
 router = DefaultRouter()
@@ -32,5 +32,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/images/banner', BannerImageView.as_view(), name='banner-image'),
     path('api/users/', SignUpView.as_view(), name='signup'),
-    path('api/user/profile/', UserProfileView.as_view(), name='user-profile'),  # 🔥 This is what your frontend is calling!
+    path('api/user/profile/', UserProfileView.as_view(), name='user-profile'), 
+    path('api/admin/dashboard/', admin_dashboard, name='admin-dashboard'),
+     
 ]

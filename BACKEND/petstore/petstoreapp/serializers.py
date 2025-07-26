@@ -89,12 +89,13 @@ class ProductSerializer(serializers.ModelSerializer):
     attributes = ProductAttributeSerializer(many=True, read_only=True)
     variants = VariantSerializer(many=True, read_only=True)
     main_image_url = serializers.SerializerMethodField()
+    stock = serializers.IntegerField( )
 
     class Meta:
         model = Product
         fields = [
             'id', 'sku', 'name', 'main_image', 'main_image_url', 'description',
-            'brand', 'categories', 'price', 'created_at', 'updated_at', 'is_active',
+            'brand', 'categories', 'price', 'stock', 'created_at', 'updated_at', 'is_active',
             'images', 'attributes', 'variants'
         ]
 

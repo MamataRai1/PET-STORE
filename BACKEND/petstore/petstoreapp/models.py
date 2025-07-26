@@ -110,6 +110,7 @@ class Product(models.Model):
     brand = models.ForeignKey('Brand', on_delete=models.PROTECT, related_name="products")
     categories = models.ManyToManyField('Category', through="ProductCategory")
     price = models.DecimalField(max_digits=10, decimal_places=2)  # New price field
+    stock = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
